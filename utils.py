@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
+import trafilatura
+from datetime import datetime, timedelta
 
 def get_stock_data(symbol, period='1y'):
     """Fetch stock data using yfinance"""
@@ -87,8 +89,7 @@ def create_price_chart(df, symbol):
         paper_bgcolor='#1E1E1E',
         plot_bgcolor='#2D2D2D',
         xaxis_rangeslider_visible=False,
-        height=800,
-        title=f'{symbol} Stock Price',
+        height=600,
         showlegend=True
     )
 
@@ -103,3 +104,24 @@ def format_number(number):
     elif number >= 1e3:
         return f"{number/1e3:.2f}K"
     return f"{number:.2f}"
+
+def get_stock_news(symbol):
+    """Get latest news for the stock"""
+    try:
+        # Remove .NS suffix for Indian stocks when searching news
+        company_symbol = symbol.replace('.NS', '')
+        stock = yf.Ticker(symbol)
+        news = stock.news
+
+        # Create DataFrame with news items
+        news_data = []
+        for item in news[:5]:  # Get latest 5 news items
+            news_data.append({
+                'Title': item['title'],
+                'Date': datetime.fromtimestamp(item['providerPublishTime']).strftime('%Y-%m-%d'),
+                'Link': item['link']
+            })
+
+        return pd.DataFrame(news_data)
+    except Exception as e:
+        return pd.DataFrame(columns=['Title', 'Date', 'Link'])

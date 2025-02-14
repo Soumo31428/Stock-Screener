@@ -260,13 +260,14 @@ def get_company_profile(info):
 
 def get_financial_metrics(info):
     """Get key financial metrics"""
+    currency_symbol = '₹' if '.NS' in info.get('symbol', '') else '$'
     metrics = {
-        'Market Cap': format_number(info.get('marketCap', 0)),
+        'Market Cap': f"{currency_symbol}{format_number(info.get('marketCap', 0))}",
         'P/E Ratio': format_number(info.get('trailingPE', 0)),
-        'EPS (TTM)': format_number(info.get('trailingEps', 0)),
+        'EPS (TTM)': f"{currency_symbol}{format_number(info.get('trailingEps', 0))}",
         'Beta': format_number(info.get('beta', 0)),
         'Dividend Yield': f"{format_number(info.get('dividendYield', 0) * 100)}%" if info.get('dividendYield') else 'N/A',
-        'Revenue (TTM)': format_number(info.get('totalRevenue', 0)),
+        'Revenue (TTM)': f"{currency_symbol}{format_number(info.get('totalRevenue', 0))}",
         'Profit Margin': f"{format_number(info.get('profitMargins', 0) * 100)}%",
         'Operating Margin': f"{format_number(info.get('operatingMargins', 0) * 100)}%",
         'ROE': f"{format_number(info.get('returnOnEquity', 0) * 100)}%",

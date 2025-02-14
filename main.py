@@ -74,6 +74,9 @@ def show_analysis(selected_stock, time_period):
             ])
 
             with tab1:
+                # Technical Analysis Chart
+                st.plotly_chart(create_price_chart(df, selected_stock), use_container_width=True)
+
                 # Summary metrics in a single row
                 col1, col2, col3, col4 = st.columns(4)
 
@@ -82,7 +85,7 @@ def show_analysis(selected_stock, time_period):
                     <div class="stock-metric">
                         Current Price
                         <br/>
-                        <span class="indicator-up">${format_number(stock_info.get('currentPrice', 0))}</span>
+                        <span class="indicator-up">₹{format_number(stock_info.get('currentPrice', 0))}</span>
                     </div>
                     """, unsafe_allow_html=True)
 
@@ -102,7 +105,7 @@ def show_analysis(selected_stock, time_period):
                     <div class="stock-metric">
                         52 Week High
                         <br/>
-                        <span>${format_number(stock_info.get('fiftyTwoWeekHigh', 0))}</span>
+                        <span>₹{format_number(stock_info.get('fiftyTwoWeekHigh', 0))}</span>
                     </div>
                     """, unsafe_allow_html=True)
 
@@ -111,39 +114,30 @@ def show_analysis(selected_stock, time_period):
                     <div class="stock-metric">
                         52 Week Low
                         <br/>
-                        <span>${format_number(stock_info.get('fiftyTwoWeekLow', 0))}</span>
+                        <span>₹{format_number(stock_info.get('fiftyTwoWeekLow', 0))}</span>
                     </div>
                     """, unsafe_allow_html=True)
 
-                # Technical Analysis Chart
-                st.plotly_chart(create_price_chart(df, selected_stock), use_container_width=True)
-
-                # Technical Indicators Explanation
-                with st.expander("📈 Technical Indicators Explanation"):
-                    st.markdown("""
-                    ### Moving Averages
-                    - **SMA 20 (Green)**: 20-day Simple Moving Average, shows short-term trend
-                    - **SMA 50 (Red)**: 50-day Simple Moving Average, shows medium-term trend
-
-                    ### Bollinger Bands
-                    The gray bands around the price represent volatility:
-                    - Upper and lower bands are 2 standard deviations from the middle band
-                    - Wider bands indicate higher volatility
-
-                    ### RSI (Relative Strength Index)
-                    - Measures momentum and overbought/oversold conditions
-                    - Above 70: Potentially overbought
-                    - Below 30: Potentially oversold
-                    """)
+                # Add Market Status Indicator
+                market_status = "Open" if stock_info.get('regularMarketOpen', None) else "Closed"
+                status_color = "#4BFF4B" if market_status == "Open" else "#FF4B4B"
+                st.markdown(f"""
+                <div style='text-align: right; margin-top: 20px;'>
+                    <span style='background-color: {status_color}; padding: 5px 10px; border-radius: 4px;'>
+                        Market {market_status}
+                    </span>
+                </div>
+                """, unsafe_allow_html=True)
 
             with tab2:
-                # Company Profile
+                # Company Profile with enhanced information
                 company_profile = get_company_profile(stock_info)
 
                 st.subheader("Company Overview")
                 st.write(company_profile['Business Summary'])
 
-                col1, col2 = st.columns(2)
+                # Enhanced company metrics
+                col1, col2, col3 = st.columns(3)
                 with col1:
                     st.markdown("### Industry Information")
                     st.markdown(f"""
@@ -153,11 +147,43 @@ def show_analysis(selected_stock, time_period):
                     """)
 
                 with col2:
-                    st.markdown("### Company Website")
+                    st.markdown("### Trading Information")
+                    st.markdown(f"""
+                    - **Exchange**: {stock_info.get('exchange', 'N/A')}
+                    - **Currency**: {stock_info.get('currency', 'N/A')}
+                    - **Market Cap**: ₹{format_number(stock_info.get('marketCap', 0))}
+                    """)
+
+                with col3:
+                    st.markdown("### Key Dates")
+                    st.markdown(f"""
+                    - **Earnings Date**: {stock_info.get('earningsDate', ['N/A'])[0] if stock_info.get('earningsDate') else 'N/A'}
+                    - **Ex-Dividend Date**: {stock_info.get('exDividendDate', 'N/A')}
+                    - **Fiscal Year End**: {stock_info.get('lastFiscalYearEnd', 'N/A')}
+                    """)
+
+                # Company contact information
+                st.subheader("Company Contact")
+                col1, col2 = st.columns(2)
+                with col1:
                     if company_profile['Website'] != 'N/A':
-                        st.markdown(f"[Visit Website]({company_profile['Website']})")
+                        st.markdown(f"🌐 [Official Website]({company_profile['Website']})")
                     else:
                         st.write("Website not available")
+
+                with col2:
+                    st.markdown(f"📍 **Headquarters**: {stock_info.get('city', 'N/A')}, {stock_info.get('country', 'N/A')}")
+
+                # Add sustainability score if available
+                if stock_info.get('sustainabilityScore'):
+                    st.subheader("ESG Scores")
+                    esg_col1, esg_col2, esg_col3 = st.columns(3)
+                    with esg_col1:
+                        st.metric("Environmental Score", stock_info.get('environmentScore', 'N/A'))
+                    with esg_col2:
+                        st.metric("Social Score", stock_info.get('socialScore', 'N/A'))
+                    with esg_col3:
+                        st.metric("Governance Score", stock_info.get('governanceScore', 'N/A'))
 
             with tab3:
                 # Financial Metrics

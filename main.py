@@ -15,11 +15,28 @@ st.set_page_config(
 with open('styles.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-# Default Indian and US stocks
+# Indian Fortune 500 stocks
 default_stocks = [
-    'RELIANCE.NS', 'TCS.NS', 'HDFCBANK.NS', 'INFY.NS', 'ICICIBANK.NS',  # Indian stocks
-    'TATAMOTORS.NS', 'WIPRO.NS', 'ITC.NS', 'SUNPHARMA.NS', 'LT.NS',     # More Indian stocks
-    'AAPL', 'GOOGL', 'MSFT', 'AMZN', 'META'  # US stocks
+    'RELIANCE.NS',    # Reliance Industries
+    'TCS.NS',         # Tata Consultancy Services
+    'HDFCBANK.NS',    # HDFC Bank
+    'INFY.NS',        # Infosys
+    'ICICIBANK.NS',   # ICICI Bank
+    'HINDUNILVR.NS',  # Hindustan Unilever
+    'SBIN.NS',        # State Bank of India
+    'BHARTIARTL.NS',  # Bharti Airtel
+    'ITC.NS',         # ITC Limited
+    'KOTAKBANK.NS',   # Kotak Mahindra Bank
+    'LT.NS',          # Larsen & Toubro
+    'BAJFINANCE.NS',  # Bajaj Finance
+    'ASIANPAINT.NS',  # Asian Paints
+    'MARUTI.NS',      # Maruti Suzuki
+    'WIPRO.NS',       # Wipro
+    'TITAN.NS',       # Titan Company
+    'ADANIENT.NS',    # Adani Enterprises
+    'ULTRACEMCO.NS',  # UltraTech Cement
+    'SUNPHARMA.NS',   # Sun Pharma
+    'AXISBANK.NS'     # Axis Bank
 ]
 
 # Predefined time periods with descriptions
@@ -41,8 +58,6 @@ if 'current_page' not in st.session_state:
     st.session_state.current_page = 'home'
 if 'selected_stock' not in st.session_state:
     st.session_state.selected_stock = None
-if 'time_period' not in st.session_state:
-    st.session_state.time_period = '1y'
 if 'custom_start_date' not in st.session_state:
     st.session_state.custom_start_date = datetime.now() - timedelta(days=365)
 if 'custom_end_date' not in st.session_state:
@@ -237,7 +252,7 @@ def show_analysis(selected_stock, time_period):
             st.error('Error loading stock data. Please try again later.')
 
 # Sidebar
-st.sidebar.title('Stock Analysis Dashboard')
+st.sidebar.title('Indian Stock Analysis Dashboard')
 
 # Handle navigation
 if st.session_state.current_page == 'analysis':
@@ -248,59 +263,93 @@ if st.session_state.current_page == 'analysis':
     show_analysis(st.session_state.selected_stock, st.session_state.time_period)
 else:
     # Home page
-    selected_stock = st.sidebar.selectbox('Select Stock', default_stocks)
-
-    # Time period selection
-    time_period_type = st.sidebar.radio(
-        "Select Time Period Type",
-        ["Predefined Ranges", "Custom Range"]
+    selected_stock = st.sidebar.selectbox(
+        'Select Indian Stock',
+        default_stocks,
+        format_func=lambda x: x.replace('.NS', '')  # Remove .NS suffix in display
     )
 
-    if time_period_type == "Predefined Ranges":
+    # Enhanced time period selection
+    time_selection = st.sidebar.radio(
+        "Select Time Range Type",
+        ["Predefined Periods", "Custom Range"]
+    )
+
+    if time_selection == "Predefined Periods":
         time_period = st.sidebar.selectbox(
             'Select Time Period',
-            list(TIME_PERIODS.keys())[:-1],  # Exclude 'custom' option
-            format_func=lambda x: TIME_PERIODS[x]
+            ['1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', 'max'],
+            format_func=lambda x: {
+                '1d': 'Last 24 Hours',
+                '5d': 'Last 5 Days',
+                '1mo': 'Last Month',
+                '3mo': 'Last 3 Months',
+                '6mo': 'Last 6 Months',
+                '1y': 'Last Year',
+                '2y': 'Last 2 Years',
+                '5y': 'Last 5 Years',
+                'max': 'Maximum Available'
+            }[x]
         )
     else:
         time_period = 'custom'
+        st.sidebar.markdown("### Select Custom Date Range")
+
+        # Add minimum date validation
+        min_date = datetime(2000, 1, 1)  # Stock data typically starts from 2000
+        max_date = datetime.now()
+
+        # Custom date range selectors with better formatting
         col1, col2 = st.sidebar.columns(2)
         with col1:
             st.session_state.custom_start_date = st.date_input(
-                "Start Date",
+                "From Date",
                 value=st.session_state.custom_start_date,
-                max_value=datetime.now()
+                min_value=min_date,
+                max_value=max_date,
+                help="Select start date"
             )
         with col2:
             st.session_state.custom_end_date = st.date_input(
-                "End Date",
+                "To Date",
                 value=st.session_state.custom_end_date,
                 min_value=st.session_state.custom_start_date,
-                max_value=datetime.now()
+                max_value=max_date,
+                help="Select end date"
             )
 
-    if st.sidebar.button('Analyze Stock'):
+    if st.sidebar.button('Analyze Stock', type='primary'):
         st.session_state.selected_stock = selected_stock
         st.session_state.time_period = time_period
         st.session_state.current_page = 'analysis'
         st.rerun()
 
     # Welcome message on home page
-    st.title("Welcome to Stock Analysis Dashboard")
+    st.title("Welcome to Indian Stock Analysis Dashboard")
     st.markdown("""
     ### How to use:
-    1. Select a stock from the sidebar (includes both Indian and US stocks)
-    2. Choose between predefined time periods or a custom date range
+    1. Select an Indian stock from the sidebar
+    2. Choose between predefined time periods or set a custom date range
     3. Click 'Analyze Stock' to see detailed analysis
 
-    ### Available Stocks:
-    - **Indian Markets**: RELIANCE, TCS, HDFC Bank, and more
-    - **US Markets**: Apple, Google, Microsoft, and more
+    ### Available Features:
+    - **Real-time Price Data**: Track current market prices and daily changes
+    - **Technical Analysis**: View price trends and key indicators
+    - **Company Profile**: Get detailed company information and ESG scores
+    - **Financial Metrics**: Analyze key financial ratios and performance metrics
+    - **Latest News**: Stay updated with company-specific news
     """)
+
+    # Display available stocks in a grid
+    st.subheader("Available Stocks")
+    cols = st.columns(4)
+    for i, stock in enumerate(default_stocks):
+        company_name = stock.replace('.NS', '')
+        cols[i % 4].markdown(f"• {company_name}")
 
 # Footer
 st.markdown("""
 <div style='text-align: center; color: #666666; padding: 20px;'>
-    Data provided by Yahoo Finance | Updated daily
+    Data provided by Yahoo Finance | Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} IST
 </div>
 """, unsafe_allow_html=True)

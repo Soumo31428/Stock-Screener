@@ -14,14 +14,6 @@ st.set_page_config(
 with open('styles.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-# Initialize session state
-if 'page' not in st.session_state:
-    st.session_state.page = 'input'
-if 'selected_stock' not in st.session_state:
-    st.session_state.selected_stock = None
-if 'time_period' not in st.session_state:
-    st.session_state.time_period = '1y'
-
 # Default Indian and US stocks
 default_stocks = [
     'RELIANCE.NS', 'TCS.NS', 'HDFCBANK.NS', 'INFY.NS', 'ICICIBANK.NS',  # Indian stocks
@@ -29,44 +21,21 @@ default_stocks = [
     'AAPL', 'GOOGL', 'MSFT', 'AMZN', 'META'  # US stocks
 ]
 
-def show_input_page():
-    st.sidebar.title('Stock Analysis Dashboard')
-    selected_stock = st.sidebar.selectbox('Select Stock', default_stocks)
-    time_period = st.sidebar.select_slider(
-        'Select Time Period',
-        options=['1mo', '3mo', '6mo', '1y', '2y', '5y'],
-        value='1y'
-    )
+# Initialize session state variables if they don't exist
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = 'home'
+if 'selected_stock' not in st.session_state:
+    st.session_state.selected_stock = None
+if 'time_period' not in st.session_state:
+    st.session_state.time_period = '1y'
 
-    if st.sidebar.button('Analyze Stock'):
-        st.session_state.selected_stock = selected_stock
-        st.session_state.time_period = time_period
-        st.session_state.page = 'analysis'
-        st.rerun()
-
-    st.title("Welcome to Stock Analysis Dashboard")
-    st.markdown("""
-    ### How to use:
-    1. Select a stock from the sidebar (includes both Indian and US stocks)
-    2. Choose your preferred time period
-    3. Click 'Analyze Stock' to see detailed analysis
-
-    ### Available Stocks:
-    - **Indian Markets**: RELIANCE, TCS, HDFC Bank, and more
-    - **US Markets**: Apple, Google, Microsoft, and more
-    """)
-
-def show_analysis_page():
-    st.sidebar.title('Stock Analysis Dashboard')
-    if st.sidebar.button('← Back to Stock Selection'):
-        st.session_state.page = 'input'
-        st.rerun()
-
-    st.title(f"📈 {st.session_state.selected_stock} Analysis")
+def show_analysis(selected_stock, time_period):
+    """Show the analysis page content"""
+    st.title(f"📈 {selected_stock} Analysis")
 
     # Load data
     with st.spinner('Loading stock data...'):
-        hist_data, stock_info = get_stock_data(st.session_state.selected_stock, st.session_state.time_period)
+        hist_data, stock_info = get_stock_data(selected_stock, time_period)
 
         if hist_data is not None and stock_info is not None:
             # Calculate metrics
@@ -114,7 +83,7 @@ def show_analysis_page():
                 """, unsafe_allow_html=True)
 
             # Price chart
-            st.plotly_chart(create_price_chart(df, st.session_state.selected_stock), use_container_width=True)
+            st.plotly_chart(create_price_chart(df, selected_stock), use_container_width=True)
 
             # Additional metrics and news in two columns
             col1, col2 = st.columns([1, 1])
@@ -135,7 +104,7 @@ def show_analysis_page():
 
             with col2:
                 st.markdown("### Latest News")
-                news_df = get_stock_news(st.session_state.selected_stock)
+                news_df = get_stock_news(selected_stock)
                 if not news_df.empty:
                     for _, row in news_df.iterrows():
                         st.markdown(f"""
@@ -147,15 +116,46 @@ def show_analysis_page():
                         """, unsafe_allow_html=True)
                 else:
                     st.info("No recent news available")
-
         else:
             st.error('Error loading stock data. Please try again later.')
 
-# Main page routing
-if st.session_state.page == 'input':
-    show_input_page()
-elif st.session_state.page == 'analysis':
-    show_analysis_page()
+# Sidebar
+st.sidebar.title('Stock Analysis Dashboard')
+
+# Handle navigation
+if st.session_state.current_page == 'analysis':
+    if st.sidebar.button('← Back to Home'):
+        st.session_state.current_page = 'home'
+        st.rerun()
+
+    show_analysis(st.session_state.selected_stock, st.session_state.time_period)
+else:
+    # Home page
+    selected_stock = st.sidebar.selectbox('Select Stock', default_stocks)
+    time_period = st.sidebar.select_slider(
+        'Select Time Period',
+        options=['1mo', '3mo', '6mo', '1y', '2y', '5y'],
+        value='1y'
+    )
+
+    if st.sidebar.button('Analyze Stock'):
+        st.session_state.selected_stock = selected_stock
+        st.session_state.time_period = time_period
+        st.session_state.current_page = 'analysis'
+        st.rerun()
+
+    # Welcome message on home page
+    st.title("Welcome to Stock Analysis Dashboard")
+    st.markdown("""
+    ### How to use:
+    1. Select a stock from the sidebar (includes both Indian and US stocks)
+    2. Choose your preferred time period
+    3. Click 'Analyze Stock' to see detailed analysis
+
+    ### Available Stocks:
+    - **Indian Markets**: RELIANCE, TCS, HDFC Bank, and more
+    - **US Markets**: Apple, Google, Microsoft, and more
+    """)
 
 # Footer
 st.markdown("""

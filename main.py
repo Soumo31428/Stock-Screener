@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from utils import get_stock_data, calculate_metrics, create_price_chart, format_number, get_stock_news
+from utils import get_stock_data, calculate_metrics, create_price_chart, format_number, get_stock_news, get_company_profile, get_financial_metrics
 from datetime import datetime, timedelta
 
 # Page configuration
@@ -55,7 +55,6 @@ def show_analysis(selected_stock, time_period):
     # Load data
     with st.spinner('Loading stock data...'):
         if time_period == 'custom':
-            # Format dates for custom range
             start_date = st.session_state.custom_start_date.strftime('%Y-%m-%d')
             end_date = st.session_state.custom_end_date.strftime('%Y-%m-%d')
             hist_data, stock_info = get_stock_data(selected_stock, 'custom', start_date, end_date)
@@ -66,78 +65,145 @@ def show_analysis(selected_stock, time_period):
             # Calculate metrics
             df = calculate_metrics(hist_data)
 
-            # Summary metrics
-            col1, col2, col3, col4 = st.columns(4)
+            # Create tabs for different sections
+            tab1, tab2, tab3, tab4 = st.tabs([
+                "📊 Price & Technical Analysis",
+                "🏢 Company Profile",
+                "💰 Financial Metrics",
+                "📰 News"
+            ])
 
-            with col1:
-                st.markdown(f"""
-                <div class="stock-metric">
-                    Current Price
-                    <br/>
-                    <span class="indicator-up">${format_number(stock_info.get('currentPrice', 0))}</span>
-                </div>
-                """, unsafe_allow_html=True)
+            with tab1:
+                # Summary metrics in a single row
+                col1, col2, col3, col4 = st.columns(4)
 
-            with col2:
-                change = stock_info.get('regularMarketChangePercent', 0)
-                indicator_class = "indicator-up" if change >= 0 else "indicator-down"
-                st.markdown(f"""
-                <div class="stock-metric">
-                    24h Change
-                    <br/>
-                    <span class="{indicator_class}">{change:.2f}%</span>
-                </div>
-                """, unsafe_allow_html=True)
+                with col1:
+                    st.markdown(f"""
+                    <div class="stock-metric">
+                        Current Price
+                        <br/>
+                        <span class="indicator-up">${format_number(stock_info.get('currentPrice', 0))}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-            with col3:
-                st.markdown(f"""
-                <div class="stock-metric">
-                    Market Cap
-                    <br/>
-                    <span>${format_number(stock_info.get('marketCap', 0))}</span>
-                </div>
-                """, unsafe_allow_html=True)
+                with col2:
+                    change = stock_info.get('regularMarketChangePercent', 0)
+                    indicator_class = "indicator-up" if change >= 0 else "indicator-down"
+                    st.markdown(f"""
+                    <div class="stock-metric">
+                        24h Change
+                        <br/>
+                        <span class="{indicator_class}">{change:.2f}%</span>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-            with col4:
-                st.markdown(f"""
-                <div class="stock-metric">
-                    Volume
-                    <br/>
-                    <span>{format_number(stock_info.get('volume', 0))}</span>
-                </div>
-                """, unsafe_allow_html=True)
+                with col3:
+                    st.markdown(f"""
+                    <div class="stock-metric">
+                        52 Week High
+                        <br/>
+                        <span>${format_number(stock_info.get('fiftyTwoWeekHigh', 0))}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-            # Price chart
-            st.plotly_chart(create_price_chart(df, selected_stock), use_container_width=True)
+                with col4:
+                    st.markdown(f"""
+                    <div class="stock-metric">
+                        52 Week Low
+                        <br/>
+                        <span>${format_number(stock_info.get('fiftyTwoWeekLow', 0))}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-            # Additional metrics and news in two columns
-            col1, col2 = st.columns([1, 1])
+                # Technical Analysis Chart
+                st.plotly_chart(create_price_chart(df, selected_stock), use_container_width=True)
 
-            with col1:
-                st.markdown("### Key Statistics")
-                metrics_df = pd.DataFrame({
-                    'Metric': ['P/E Ratio', 'EPS', '52 Week High', '52 Week Low', 'Beta'],
-                    'Value': [
-                        format_number(stock_info.get('trailingPE', 0)),
-                        format_number(stock_info.get('trailingEps', 0)),
-                        format_number(stock_info.get('fiftyTwoWeekHigh', 0)),
-                        format_number(stock_info.get('fiftyTwoWeekLow', 0)),
-                        format_number(stock_info.get('beta', 0))
-                    ]
-                })
-                st.dataframe(metrics_df, use_container_width=True)
+                # Technical Indicators Explanation
+                with st.expander("📈 Technical Indicators Explanation"):
+                    st.markdown("""
+                    ### Moving Averages
+                    - **SMA 20 (Green)**: 20-day Simple Moving Average, shows short-term trend
+                    - **SMA 50 (Red)**: 50-day Simple Moving Average, shows medium-term trend
 
-            with col2:
-                st.markdown("### Latest News")
+                    ### Bollinger Bands
+                    The gray bands around the price represent volatility:
+                    - Upper and lower bands are 2 standard deviations from the middle band
+                    - Wider bands indicate higher volatility
+
+                    ### RSI (Relative Strength Index)
+                    - Measures momentum and overbought/oversold conditions
+                    - Above 70: Potentially overbought
+                    - Below 30: Potentially oversold
+                    """)
+
+            with tab2:
+                # Company Profile
+                company_profile = get_company_profile(stock_info)
+
+                st.subheader("Company Overview")
+                st.write(company_profile['Business Summary'])
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown("### Industry Information")
+                    st.markdown(f"""
+                    - **Sector**: {company_profile['Sector']}
+                    - **Industry**: {company_profile['Industry']}
+                    - **Employees**: {company_profile['Full Time Employees']}
+                    """)
+
+                with col2:
+                    st.markdown("### Company Website")
+                    if company_profile['Website'] != 'N/A':
+                        st.markdown(f"[Visit Website]({company_profile['Website']})")
+                    else:
+                        st.write("Website not available")
+
+            with tab3:
+                # Financial Metrics
+                financial_metrics = get_financial_metrics(stock_info)
+
+                # Valuation Metrics
+                st.subheader("Valuation Metrics")
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.metric("Market Cap", financial_metrics['Market Cap'])
+                    st.metric("P/E Ratio", financial_metrics['P/E Ratio'])
+                    st.metric("EPS (TTM)", financial_metrics['EPS (TTM)'])
+
+                with col2:
+                    st.metric("Revenue (TTM)", financial_metrics['Revenue (TTM)'])
+                    st.metric("Profit Margin", financial_metrics['Profit Margin'])
+                    st.metric("Operating Margin", financial_metrics['Operating Margin'])
+
+                with col3:
+                    st.metric("ROE", financial_metrics['ROE'])
+                    st.metric("Beta", financial_metrics['Beta'])
+                    st.metric("Dividend Yield", financial_metrics['Dividend Yield'])
+
+                # Additional Financial Ratios
+                st.subheader("Financial Ratios")
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    st.metric("Debt to Equity", financial_metrics['Debt to Equity'])
+
+                with col2:
+                    st.metric("Current Ratio", financial_metrics['Current Ratio'])
+
+            with tab4:
+                # News Section
                 news_df = get_stock_news(selected_stock)
                 if not news_df.empty:
                     for _, row in news_df.iterrows():
                         st.markdown(f"""
                         <div class="news-item">
-                            <a href="{row['Link']}" target="_blank">{row['Title']}</a>
-                            <br/>
-                            <small>{row['Date']}</small>
+                            <h4>{row['Title']}</h4>
+                            <p>{row['Date']}</p>
+                            <a href="{row['Link']}" target="_blank">Read More</a>
                         </div>
+                        <hr>
                         """, unsafe_allow_html=True)
                 else:
                     st.info("No recent news available")

@@ -39,21 +39,7 @@ default_stocks = [
     'AXISBANK.NS'     # Axis Bank
 ]
 
-# Predefined time periods with descriptions
-TIME_PERIODS = {
-    '1d': 'Last 24 Hours',
-    '5d': 'Last 5 Days',
-    '1mo': 'Last Month',
-    '3mo': 'Last 3 Months',
-    '6mo': 'Last 6 Months',
-    '1y': 'Last Year',
-    '2y': 'Last 2 Years',
-    '5y': 'Last 5 Years',
-    'max': 'Maximum Available',
-    'custom': 'Custom Range'
-}
-
-# Initialize session state variables if they don't exist
+# Initialize session state variables
 if 'current_page' not in st.session_state:
     st.session_state.current_page = 'home'
 if 'selected_stock' not in st.session_state:

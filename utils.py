@@ -52,11 +52,16 @@ def calculate_rsi(prices, period=14):
 
 def create_price_chart(df, symbol):
     """Create an interactive price chart with indicators"""
-    fig = make_subplots(rows=3, cols=1, shared_xaxes=True, 
-                        vertical_spacing=0.03, 
-                        row_heights=[0.6, 0.2, 0.2])
+    # Create figure with secondary y-axis
+    fig = make_subplots(
+        rows=3, 
+        cols=1, 
+        shared_xaxes=True,
+        vertical_spacing=0.1,  # Increased spacing between subplots
+        row_heights=[0.5, 0.25, 0.25]  # Adjusted height ratios
+    )
 
-    # Candlestick chart with Bollinger Bands
+    # Main price chart
     fig.add_trace(
         go.Candlestick(
             x=df.index,
@@ -64,19 +69,20 @@ def create_price_chart(df, symbol):
             high=df['High'],
             low=df['Low'],
             close=df['Close'],
-            name='OHLC'
+            name='Price',
+            showlegend=True
         ),
         row=1, col=1
     )
 
-    # Add Bollinger Bands
+    # Bollinger Bands with reduced opacity
     fig.add_trace(
         go.Scatter(
             x=df.index,
             y=df['BB_upper'],
-            name='BB Upper',
-            line=dict(color='rgba(250, 250, 250, 0.4)'),
-            fill=None
+            name='Upper Band',
+            line=dict(color='rgba(173, 204, 255, 0.3)'),
+            showlegend=True
         ),
         row=1, col=1
     )
@@ -85,21 +91,23 @@ def create_price_chart(df, symbol):
         go.Scatter(
             x=df.index,
             y=df['BB_lower'],
-            name='BB Lower',
-            line=dict(color='rgba(250, 250, 250, 0.4)'),
+            name='Lower Band',
+            line=dict(color='rgba(173, 204, 255, 0.3)'),
             fill='tonexty',
-            fillcolor='rgba(250, 250, 250, 0.1)'
+            fillcolor='rgba(173, 204, 255, 0.1)',
+            showlegend=True
         ),
         row=1, col=1
     )
 
-    # Add SMAs
+    # Moving averages with clearer colors
     fig.add_trace(
         go.Scatter(
             x=df.index,
             y=df['SMA_20'],
-            name='SMA 20',
-            line=dict(color='#00FF9D')
+            name='20-Day MA',
+            line=dict(color='#00FF9D', width=1.5),
+            showlegend=True
         ),
         row=1, col=1
     )
@@ -108,53 +116,99 @@ def create_price_chart(df, symbol):
         go.Scatter(
             x=df.index,
             y=df['SMA_50'],
-            name='SMA 50',
-            line=dict(color='#FF4B4B')
+            name='50-Day MA',
+            line=dict(color='#FF4B4B', width=1.5),
+            showlegend=True
         ),
         row=1, col=1
     )
 
-    # Volume bars
-    colors = ['#4BFF4B' if row['Close'] >= row['Open'] else '#FF4B4B' for index, row in df.iterrows()]
+    # Volume bars with improved colors
+    colors = ['#4BFF4B' if row['Close'] >= row['Open'] else '#FF4B4B' 
+              for index, row in df.iterrows()]
+
     fig.add_trace(
         go.Bar(
             x=df.index,
             y=df['Volume'],
             name='Volume',
-            marker_color=colors
+            marker_color=colors,
+            opacity=0.8,
+            showlegend=True
         ),
         row=2, col=1
     )
 
-    # RSI
+    # RSI with improved visualization
     fig.add_trace(
         go.Scatter(
             x=df.index,
             y=df['RSI'],
             name='RSI',
-            line=dict(color='#00FF9D')
+            line=dict(color='#00FF9D', width=1.5),
+            showlegend=True
         ),
         row=3, col=1
     )
 
-    # Add RSI levels
-    fig.add_hline(y=70, line_color='#FF4B4B', line_width=1, line_dash='dash', row=3, col=1)
-    fig.add_hline(y=30, line_color='#4BFF4B', line_width=1, line_dash='dash', row=3, col=1)
+    # Add RSI levels with labels
+    fig.add_hline(
+        y=70, 
+        line_color='#FF4B4B', 
+        line_width=1, 
+        line_dash='dash',
+        annotation_text="Overbought (70)",
+        annotation_position="right",
+        row=3, col=1
+    )
 
-    # Update layout
+    fig.add_hline(
+        y=30, 
+        line_color='#4BFF4B', 
+        line_width=1, 
+        line_dash='dash',
+        annotation_text="Oversold (30)",
+        annotation_position="right",
+        row=3, col=1
+    )
+
+    # Update layout with improved styling
     fig.update_layout(
         template='plotly_dark',
         paper_bgcolor='#1E1E1E',
         plot_bgcolor='#2D2D2D',
         xaxis_rangeslider_visible=False,
         height=800,
-        showlegend=True
+        showlegend=True,
+        legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=0.01,
+            bgcolor='rgba(0,0,0,0.5)'
+        ),
+        margin=dict(l=50, r=50, t=30, b=50)
     )
 
-    # Update y-axes labels
-    fig.update_yaxes(title_text="Price", row=1, col=1)
-    fig.update_yaxes(title_text="Volume", row=2, col=1)
-    fig.update_yaxes(title_text="RSI", row=3, col=1)
+    # Add grid and improve axes
+    fig.update_xaxes(
+        showgrid=True,
+        gridwidth=1,
+        gridcolor='rgba(128,128,128,0.2)',
+        zeroline=False
+    )
+
+    fig.update_yaxes(
+        showgrid=True,
+        gridwidth=1,
+        gridcolor='rgba(128,128,128,0.2)',
+        zeroline=False
+    )
+
+    # Update y-axes labels with improved styling
+    fig.update_yaxes(title_text="Price", row=1, col=1, title_standoff=10)
+    fig.update_yaxes(title_text="Volume", row=2, col=1, title_standoff=10)
+    fig.update_yaxes(title_text="RSI", row=3, col=1, title_standoff=10)
 
     return fig
 

@@ -42,7 +42,7 @@ def show_input_page():
         st.session_state.selected_stock = selected_stock
         st.session_state.time_period = time_period
         st.session_state.page = 'analysis'
-        st.experimental_rerun()
+        st.rerun()
 
     st.title("Welcome to Stock Analysis Dashboard")
     st.markdown("""
@@ -60,7 +60,7 @@ def show_analysis_page():
     st.sidebar.title('Stock Analysis Dashboard')
     if st.sidebar.button('← Back to Stock Selection'):
         st.session_state.page = 'input'
-        st.experimental_rerun()
+        st.rerun()
 
     st.title(f"📈 {st.session_state.selected_stock} Analysis")
 

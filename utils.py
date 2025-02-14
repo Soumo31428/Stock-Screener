@@ -6,14 +6,18 @@ import numpy as np
 import trafilatura
 from datetime import datetime, timedelta
 
-def get_stock_data(symbol, period='1y'):
+def get_stock_data(symbol, period='1y', start_date=None, end_date=None):
     """Fetch stock data using yfinance"""
     try:
         stock = yf.Ticker(symbol)
-        hist = stock.history(period=period)
+        if period == 'custom' and start_date and end_date:
+            hist = stock.history(start=start_date, end=end_date)
+        else:
+            hist = stock.history(period=period)
         info = stock.info
         return hist, info
     except Exception as e:
+        print(f"Error fetching stock data: {str(e)}")
         return None, None
 
 def calculate_metrics(df):
@@ -124,4 +128,5 @@ def get_stock_news(symbol):
 
         return pd.DataFrame(news_data)
     except Exception as e:
+        print(f"Error fetching news: {str(e)}")
         return pd.DataFrame(columns=['Title', 'Date', 'Link'])

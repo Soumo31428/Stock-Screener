@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from utils import get_stock_data, calculate_metrics, create_price_chart, format_number, get_stock_news
+from datetime import datetime, timedelta
 
 # Page configuration
 st.set_page_config(
@@ -21,6 +22,20 @@ default_stocks = [
     'AAPL', 'GOOGL', 'MSFT', 'AMZN', 'META'  # US stocks
 ]
 
+# Predefined time periods with descriptions
+TIME_PERIODS = {
+    '1d': 'Last 24 Hours',
+    '5d': 'Last 5 Days',
+    '1mo': 'Last Month',
+    '3mo': 'Last 3 Months',
+    '6mo': 'Last 6 Months',
+    '1y': 'Last Year',
+    '2y': 'Last 2 Years',
+    '5y': 'Last 5 Years',
+    'max': 'Maximum Available',
+    'custom': 'Custom Range'
+}
+
 # Initialize session state variables if they don't exist
 if 'current_page' not in st.session_state:
     st.session_state.current_page = 'home'
@@ -28,6 +43,10 @@ if 'selected_stock' not in st.session_state:
     st.session_state.selected_stock = None
 if 'time_period' not in st.session_state:
     st.session_state.time_period = '1y'
+if 'custom_start_date' not in st.session_state:
+    st.session_state.custom_start_date = datetime.now() - timedelta(days=365)
+if 'custom_end_date' not in st.session_state:
+    st.session_state.custom_end_date = datetime.now()
 
 def show_analysis(selected_stock, time_period):
     """Show the analysis page content"""
@@ -35,7 +54,13 @@ def show_analysis(selected_stock, time_period):
 
     # Load data
     with st.spinner('Loading stock data...'):
-        hist_data, stock_info = get_stock_data(selected_stock, time_period)
+        if time_period == 'custom':
+            # Format dates for custom range
+            start_date = st.session_state.custom_start_date.strftime('%Y-%m-%d')
+            end_date = st.session_state.custom_end_date.strftime('%Y-%m-%d')
+            hist_data, stock_info = get_stock_data(selected_stock, 'custom', start_date, end_date)
+        else:
+            hist_data, stock_info = get_stock_data(selected_stock, time_period)
 
         if hist_data is not None and stock_info is not None:
             # Calculate metrics
@@ -132,11 +157,35 @@ if st.session_state.current_page == 'analysis':
 else:
     # Home page
     selected_stock = st.sidebar.selectbox('Select Stock', default_stocks)
-    time_period = st.sidebar.select_slider(
-        'Select Time Period',
-        options=['1mo', '3mo', '6mo', '1y', '2y', '5y'],
-        value='1y'
+
+    # Time period selection
+    time_period_type = st.sidebar.radio(
+        "Select Time Period Type",
+        ["Predefined Ranges", "Custom Range"]
     )
+
+    if time_period_type == "Predefined Ranges":
+        time_period = st.sidebar.selectbox(
+            'Select Time Period',
+            list(TIME_PERIODS.keys())[:-1],  # Exclude 'custom' option
+            format_func=lambda x: TIME_PERIODS[x]
+        )
+    else:
+        time_period = 'custom'
+        col1, col2 = st.sidebar.columns(2)
+        with col1:
+            st.session_state.custom_start_date = st.date_input(
+                "Start Date",
+                value=st.session_state.custom_start_date,
+                max_value=datetime.now()
+            )
+        with col2:
+            st.session_state.custom_end_date = st.date_input(
+                "End Date",
+                value=st.session_state.custom_end_date,
+                min_value=st.session_state.custom_start_date,
+                max_value=datetime.now()
+            )
 
     if st.sidebar.button('Analyze Stock'):
         st.session_state.selected_stock = selected_stock
@@ -149,7 +198,7 @@ else:
     st.markdown("""
     ### How to use:
     1. Select a stock from the sidebar (includes both Indian and US stocks)
-    2. Choose your preferred time period
+    2. Choose between predefined time periods or a custom date range
     3. Click 'Analyze Stock' to see detailed analysis
 
     ### Available Stocks:

@@ -214,15 +214,14 @@ def create_price_chart(df, symbol):
         row_heights=[0.5, 0.25, 0.25]  # Adjusted height ratios
     )
 
-    # Main price chart
+    # Main price line chart
     fig.add_trace(
-        go.Candlestick(
+        go.Scatter(
             x=df.index,
-            open=df['Open'],
-            high=df['High'],
-            low=df['Low'],
-            close=df['Close'],
-            name='Price',
+            y=df['Close'],
+            mode='lines',
+            name='Close Price',
+            line=dict(color='#00FF9D', width=2),
             showlegend=True
         ),
         row=1, col=1
@@ -276,17 +275,16 @@ def create_price_chart(df, symbol):
         row=1, col=1
     )
 
-    # Volume bars with improved colors
-    colors = ['#4BFF4B' if row['Close'] >= row['Open'] else '#FF4B4B' 
-              for index, row in df.iterrows()]
-
+    # Volume area chart
     fig.add_trace(
-        go.Bar(
+        go.Scatter(
             x=df.index,
             y=df['Volume'],
+            mode='lines',
+            fill='tozeroy',
             name='Volume',
-            marker_color=colors,
-            opacity=0.8,
+            line=dict(color='#FFB84D', width=1),
+            fillcolor='rgba(255, 184, 77, 0.3)',
             showlegend=True
         ),
         row=2, col=1
@@ -397,15 +395,15 @@ def get_company_profile(info):
     return profile
 
 def get_financial_metrics(info):
-    """Get key financial metrics"""
-    currency_symbol = '₹' if '.NS' in info.get('symbol', '') else '$'
+    """Get key financial metrics in rupees"""
+    # Always use rupees for Indian stocks
     metrics = {
-        'Market Cap': f"{currency_symbol}{format_number(info.get('marketCap', 0))}",
+        'Market Cap': f"₹{format_number(info.get('marketCap', 0))}",
         'P/E Ratio': format_number(info.get('trailingPE', 0)),
-        'EPS (TTM)': f"{currency_symbol}{format_number(info.get('trailingEps', 0))}",
+        'EPS (TTM)': f"₹{format_number(info.get('trailingEps', 0))}",
         'Beta': format_number(info.get('beta', 0)),
         'Dividend Yield': f"{format_number(info.get('dividendYield', 0) * 100)}%" if info.get('dividendYield') else 'N/A',
-        'Revenue (TTM)': f"{currency_symbol}{format_number(info.get('totalRevenue', 0))}",
+        'Revenue (TTM)': f"₹{format_number(info.get('totalRevenue', 0))}",
         'Profit Margin': f"{format_number(info.get('profitMargins', 0) * 100)}%",
         'Operating Margin': f"{format_number(info.get('operatingMargins', 0) * 100)}%",
         'ROE': f"{format_number(info.get('returnOnEquity', 0) * 100)}%",

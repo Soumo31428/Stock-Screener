@@ -22,45 +22,43 @@ Preferred communication style: Simple, everyday language.
 - **Data Manipulation**: Pandas and NumPy for data processing and mathematical operations
 - **Default Stock Universe**: Predefined list of 20 Indian Fortune 500 companies (Reliance, TCS, HDFC Bank, etc.)
 
-### Application Structure
-- **main.py**: Primary Streamlit application with page configuration and session state management
-- **app.py**: Alternative Taipy-based interface (appears incomplete)
+### Application Structure - Minimized
+- **main.py**: Complete Streamlit application with embedded CSS styling and page management
 - **utils.py**: Core business logic including data fetching, metric calculations, and chart creation
-- **styles.css**: Custom styling with dark theme and responsive design
+- **app.py**: Removed (Taipy alternative interface)
+- **styles.css**: Removed (CSS embedded directly in main.py)
 
 ### Key Features
 - **Real-time Analysis**: Live stock price tracking with 24-hour change indicators
 - **Technical Indicators**: RSI, MACD, Bollinger Bands, and moving averages
 - **Time Period Flexibility**: Support for predefined periods (1mo to 5y) and custom date ranges
 - **Company Intelligence**: Company profiles, ESG scores, and financial metrics
-- **News Integration**: Stock-specific news using web scraping
+- **News Integration**: Simplified news functionality (web scraping removed)
 
 ### Session Management
 - Streamlit session state for maintaining user selections and navigation state
 - Custom page routing system for different analysis views
 - Persistent date range selections for custom analysis periods
 
-## External Dependencies
+## External Dependencies - Minimized
 
-### Market Data Services
-- **yfinance**: Primary source for Indian stock market data, company information, and historical prices
-- **Yahoo Finance API**: Underlying data source accessed through yfinance library
+### Core Dependencies (5 packages only)
+- **streamlit**: Web application framework for the dashboard interface  
+- **yfinance**: Primary source for Indian stock market data and company information
+- **pandas**: Data manipulation and analysis library
+- **numpy**: Numerical computing for technical indicator calculations
+- **plotly**: Interactive charting library for technical analysis visualizations
 
-### Web Scraping
-- **trafilatura**: Used for extracting and processing stock-related news content from web sources
+### Removed Dependencies
+- **trafilatura**: Removed web scraping, simplified news functionality
+- **taipy**: Removed alternative GUI framework and dependencies
 
-### Visualization and UI
-- **Plotly**: Interactive charting library for technical analysis visualizations
-- **Streamlit**: Web application framework for the dashboard interface
-- **Taipy**: Alternative GUI framework (partially implemented)
+### Frontend Assets - Embedded
+- **CSS**: Dark theme styling embedded directly in main.py (no external files)
+- **Configuration**: Minimal .streamlit/config.toml for server settings
 
-### Data Processing
-- **Pandas**: Data manipulation and analysis library
-- **NumPy**: Numerical computing for technical indicator calculations
-
-### Frontend Assets
-- **Google Fonts**: Inter and Roboto Mono fonts for typography
-- **Custom CSS**: Dark theme styling with hover effects and responsive design
-
-### Configuration
-- **Streamlit Config**: Custom configuration in .streamlit/config.toml for application settings
+### File Structure - Minimized
+- **Total Dependencies**: 5 packages (reduced from 6+)
+- **Total Core Files**: 4 files (reduced from 8+)
+- **Code Size**: Under 1000 lines total
+- **Removed Files**: app.py, styles.css

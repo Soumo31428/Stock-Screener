@@ -1,8 +1,25 @@
 [project]
-name = "repl-nix-workspace"
-version = "0.1.0"
-description = "Add your description here"
+name = "indian-stock-dashboard"
+version = "1.0.0"
+description = "A modern, real-time stock analysis dashboard for Indian stock market with intelligent rate-limiting and demo mode"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+readme = "README.md"
+license = {text = "MIT"}
 requires-python = ">=3.11"
+keywords = ["stock", "analysis", "dashboard", "indian", "finance", "streamlit"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
 dependencies = [
     "numpy>=2.2.3",
     "pandas>=2.2.3", 
@@ -10,3 +27,19 @@ dependencies = [
     "streamlit>=1.42.0",
     "yfinance>=0.2.52",
 ]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/indian-stock-dashboard"
+Repository = "https://github.com/yourusername/indian-stock-dashboard"
+Documentation = "https://github.com/yourusername/indian-stock-dashboard#readme"
+"Bug Tracker" = "https://github.com/yourusername/indian-stock-dashboard/issues"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["src"]
+
+[project.scripts]
+stock-dashboard = "main:main"

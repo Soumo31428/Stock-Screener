@@ -5,10 +5,15 @@ from datetime import datetime, timedelta
 
 # Page configuration
 st.set_page_config(
-    page_title="Stock Analysis Dashboard",
+    page_title="Indian Stock Analysis Dashboard",
     page_icon="📈",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': 'https://github.com/yourusername/indian-stock-dashboard',
+        'Report a bug': 'https://github.com/yourusername/indian-stock-dashboard/issues',
+        'About': "# Indian Stock Analysis Dashboard\nA modern stock analysis tool for Indian markets with intelligent rate-limiting and demo mode."
+    }
 )
 
 # Embedded CSS styles

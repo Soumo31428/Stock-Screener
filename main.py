@@ -11,9 +11,48 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Load custom CSS
-with open('styles.css') as f:
-    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+# Embedded CSS styles
+st.markdown("""
+<style>
+.stApp {
+    background-color: #1E1E1E;
+}
+
+.stock-metric {
+    font-family: 'monospace';
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+.indicator-up {
+    color: #4BFF4B;
+}
+
+.indicator-down {
+    color: #FF4B4B;
+}
+
+.css-1d391kg {
+    background-color: #2D2D2D;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+    transition: all 300ms ease;
+}
+
+.css-1d391kg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.news-item {
+    background-color: #2D2D2D;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 8px 0;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Indian Fortune 500 stocks
 default_stocks = [

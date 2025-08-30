@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
-import trafilatura
+# Removed trafilatura dependency - using simplified news
 from datetime import datetime, timedelta
 
 def get_sample_stock_data(symbol, period='1y'):
@@ -381,24 +381,9 @@ def format_number(number):
         return "N/A"
 
 def get_stock_news(symbol):
-    """Get latest news for the stock"""
-    try:
-        company_symbol = symbol.replace('.NS', '')
-        stock = yf.Ticker(symbol)
-        news = stock.news
-
-        news_data = []
-        for item in news[:5]:  # Get latest 5 news items
-            news_data.append({
-                'Title': item['title'],
-                'Date': datetime.fromtimestamp(item['providerPublishTime']).strftime('%Y-%m-%d'),
-                'Link': item['link']
-            })
-
-        return pd.DataFrame(news_data)
-    except Exception as e:
-        print(f"Error fetching news: {str(e)}")
-        return pd.DataFrame(columns=['Title', 'Date', 'Link'])
+    """Simplified news - returns empty DataFrame since trafilatura was removed"""
+    # Simplified to avoid external dependencies
+    return pd.DataFrame(columns=['Title', 'Date', 'Link'])
 
 def get_company_profile(info):
     """Format company profile information"""

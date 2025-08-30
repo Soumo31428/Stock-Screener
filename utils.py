@@ -6,6 +6,122 @@ import numpy as np
 import trafilatura
 from datetime import datetime, timedelta
 
+def get_sample_stock_data(symbol, period='1y'):
+    """Generate realistic sample data when Yahoo Finance is unavailable"""
+    # Generate date range based on period
+    end_date = datetime.now()
+    if period == '1mo':
+        start_date = end_date - timedelta(days=30)
+    elif period == '3mo':
+        start_date = end_date - timedelta(days=90)
+    elif period == '6mo':
+        start_date = end_date - timedelta(days=180)
+    elif period == '1y':
+        start_date = end_date - timedelta(days=365)
+    elif period == '2y':
+        start_date = end_date - timedelta(days=730)
+    elif period == '5y':
+        start_date = end_date - timedelta(days=1825)
+    else:
+        start_date = end_date - timedelta(days=365)
+    
+    # Generate realistic sample data
+    dates = pd.date_range(start=start_date, end=end_date, freq='D')
+    dates = dates[dates.weekday < 5]  # Only weekdays
+    
+    # Base prices for different stocks
+    base_prices = {
+        'RELIANCE.NS': 2500,
+        'TCS.NS': 3200,
+        'HDFCBANK.NS': 1450,
+        'INFY.NS': 1600,
+        'ICICIBANK.NS': 950,
+        'HINDUNILVR.NS': 2300,
+        'SBIN.NS': 550,
+        'BHARTIARTL.NS': 850,
+        'ITC.NS': 420,
+        'KOTAKBANK.NS': 1750,
+        'LT.NS': 3400,
+        'BAJFINANCE.NS': 6500,
+        'ASIANPAINT.NS': 3100,
+        'MARUTI.NS': 10200,
+        'WIPRO.NS': 450,
+        'TITAN.NS': 3200,
+        'ADANIENT.NS': 2300,
+        'ULTRACEMCO.NS': 9800,
+        'SUNPHARMA.NS': 1150,
+        'AXISBANK.NS': 1050
+    }
+    
+    base_price = base_prices.get(symbol, 1000)
+    
+    # Generate price data with realistic volatility
+    np.random.seed(hash(symbol) % 2**32)  # Consistent randomness per stock
+    returns = np.random.normal(0.0005, 0.02, len(dates))  # Small daily returns
+    
+    prices = [base_price]
+    for i in range(1, len(dates)):
+        new_price = prices[-1] * (1 + returns[i])
+        prices.append(max(new_price, base_price * 0.5))  # Prevent negative prices
+    
+    # Create OHLC data
+    data = []
+    for i, (date, close) in enumerate(zip(dates, prices)):
+        high = close * (1 + abs(np.random.normal(0, 0.01)))
+        low = close * (1 - abs(np.random.normal(0, 0.01)))
+        open_price = close * (1 + np.random.normal(0, 0.005))
+        volume = int(np.random.normal(1000000, 300000))
+        
+        data.append({
+            'Date': date,
+            'Open': open_price,
+            'High': max(open_price, high, close),
+            'Low': min(open_price, low, close),
+            'Close': close,
+            'Volume': max(volume, 100000)
+        })
+    
+    df = pd.DataFrame(data)
+    df.set_index('Date', inplace=True)
+    
+    # Sample stock info
+    current_price = prices[-1]
+    change_percent = ((prices[-1] - prices[-2]) / prices[-2]) * 100 if len(prices) > 1 else 0
+    
+    sample_info = {
+        'currentPrice': current_price,
+        'regularMarketChangePercent': change_percent,
+        'fiftyTwoWeekHigh': max(prices),
+        'fiftyTwoWeekLow': min(prices),
+        'marketCap': int(current_price * 1000000000),
+        'volume': df['Volume'].iloc[-1],
+        'averageVolume': int(df['Volume'].mean()),
+        'trailingPE': round(np.random.uniform(15, 35), 2),
+        'forwardPE': round(np.random.uniform(12, 30), 2),
+        'priceToBook': round(np.random.uniform(1.5, 4), 2),
+        'profitMargins': round(np.random.uniform(0.05, 0.25), 4),
+        'operatingMargins': round(np.random.uniform(0.08, 0.30), 4),
+        'returnOnEquity': round(np.random.uniform(0.10, 0.25), 4),
+        'debtToEquity': round(np.random.uniform(0.2, 1.5), 2),
+        'currentRatio': round(np.random.uniform(1.0, 2.5), 2),
+        'beta': round(np.random.uniform(0.8, 1.5), 2),
+        'dividendYield': round(np.random.uniform(0.01, 0.04), 4),
+        'trailingEps': round(current_price / np.random.uniform(15, 35), 2),
+        'totalRevenue': int(current_price * 500000000),
+        'exchange': 'NSE',
+        'currency': 'INR',
+        'longName': f"Sample Company for {symbol.replace('.NS', '')}",
+        'sector': 'Technology' if 'INFY' in symbol or 'TCS' in symbol or 'WIPRO' in symbol else 'Financial Services',
+        'industry': 'Software',
+        'website': 'https://example.com',
+        'city': 'Mumbai',
+        'country': 'India',
+        'fullTimeEmployees': int(np.random.uniform(50000, 500000)),
+        'longBusinessSummary': f"This is sample data for {symbol} due to Yahoo Finance rate limiting."
+    }
+    
+    return df, sample_info
+
 def get_stock_data(symbol, period='1y', start_date=None, end_date=None, retry_count=3):
     """Fetch stock data using yfinance with retry logic"""
     import time

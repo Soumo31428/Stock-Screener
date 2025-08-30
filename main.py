@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from utils import get_stock_data, calculate_metrics, create_price_chart, format_number, get_stock_news, get_company_profile, get_financial_metrics
+from utils import get_stock_data, get_sample_stock_data, calculate_metrics, create_price_chart, format_number, get_stock_news, get_company_profile, get_financial_metrics
 from datetime import datetime, timedelta
 
 # Page configuration
@@ -237,20 +237,151 @@ def show_analysis(selected_stock, time_period):
         else:
             # Show specific error messages based on the error type
             if stock_info == "RATE_LIMITED":
-                st.error("🚫 **Rate Limited by Yahoo Finance**")
-                st.warning("""
-                **Why this happened:**
-                - Yahoo Finance limits free API requests
-                - Too many requests in a short time period
+                st.warning("🚫 **Yahoo Finance Rate Limited - Using Demo Mode**")
+                st.info("""
+                **Yahoo Finance is currently limiting requests, but don't worry!**
                 
-                **Solutions:**
-                1. **Wait 5-10 minutes** and try again
-                2. Try a **different stock** from the dropdown
-                3. **Refresh the page** and try again
-                4. Use the app during **off-peak hours**
+                I'll show you the dashboard with realistic sample data so you can explore all features:
+                - Interactive price charts with technical indicators
+                - Company metrics and financial ratios  
+                - Complete dashboard functionality
+                
+                **To get real data:** Wait 10-15 minutes and try again, or use the app during off-peak hours.
                 """)
                 
-                st.info("💡 **Tip:** Try selecting a different stock while waiting for the rate limit to reset.")
+                # Load sample data instead
+                st.markdown("---")
+                st.markdown("### 📊 Demo Mode - Sample Data Analysis")
+                
+                with st.spinner('Loading sample data...'):
+                    sample_hist, sample_info = get_sample_stock_data(selected_stock, time_period)
+                    
+                if sample_hist is not None and sample_info is not None:
+                    # Use the same analysis logic but with sample data
+                    df = calculate_metrics(sample_hist)
+                    
+                    # Create tabs for different sections
+                    tab1, tab2, tab3, tab4 = st.tabs([
+                        "📊 Price & Technical Analysis",
+                        "🏢 Company Profile", 
+                        "💰 Financial Metrics",
+                        "📰 News"
+                    ])
+                    
+                    with tab1:
+                        st.info("📝 **Note:** This chart shows sample data due to Yahoo Finance rate limiting")
+                        
+                        # Technical Analysis Chart
+                        st.plotly_chart(create_price_chart(df, selected_stock), use_container_width=True)
+                        
+                        # Summary metrics in a single row
+                        col1, col2, col3, col4 = st.columns(4)
+                        
+                        with col1:
+                            st.markdown(f"""
+                            <div class="stock-metric">
+                                Current Price
+                                <br/>
+                                <span class="indicator-up">₹{format_number(sample_info.get('currentPrice', 0))}</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col2:
+                            change = sample_info.get('regularMarketChangePercent', 0)
+                            indicator_class = "indicator-up" if change >= 0 else "indicator-down"
+                            st.markdown(f"""
+                            <div class="stock-metric">
+                                24h Change
+                                <br/>
+                                <span class="{indicator_class}">{change:.2f}%</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col3:
+                            st.markdown(f"""
+                            <div class="stock-metric">
+                                52 Week High
+                                <br/>
+                                <span>₹{format_number(sample_info.get('fiftyTwoWeekHigh', 0))}</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        
+                        with col4:
+                            st.markdown(f"""
+                            <div class="stock-metric">
+                                52 Week Low
+                                <br/>
+                                <span>₹{format_number(sample_info.get('fiftyTwoWeekLow', 0))}</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                    
+                    with tab2:
+                        st.info("📝 **Note:** This shows sample company data due to Yahoo Finance rate limiting")
+                        
+                        # Company Overview
+                        st.subheader("Company Overview")
+                        col1, col2, col3 = st.columns(3)
+                        
+                        with col1:
+                            st.markdown("### Basic Information")
+                            st.markdown(f"""
+                            - **Company**: {sample_info.get('longName', 'Sample Company')}
+                            - **Sector**: {sample_info.get('sector', 'Technology')}
+                            - **Industry**: {sample_info.get('industry', 'Software')}
+                            - **Employees**: {format_number(sample_info.get('fullTimeEmployees', 100000))}
+                            """)
+                        
+                        with col2:
+                            st.markdown("### Trading Information")
+                            st.markdown(f"""
+                            - **Exchange**: {sample_info.get('exchange', 'NSE')}
+                            - **Currency**: {sample_info.get('currency', 'INR')}
+                            - **Market Cap**: ₹{format_number(sample_info.get('marketCap', 0))}
+                            """)
+                        
+                        with col3:
+                            st.markdown("### Sample Metrics")
+                            st.markdown(f"""
+                            - **P/E Ratio**: {sample_info.get('trailingPE', 'N/A')}
+                            - **Beta**: {sample_info.get('beta', 'N/A')}
+                            - **Dividend Yield**: {sample_info.get('dividendYield', 0)*100:.2f}%
+                            """)
+                    
+                    with tab3:
+                        st.info("📝 **Note:** These are sample financial metrics due to Yahoo Finance rate limiting")
+                        
+                        # Financial Metrics using sample data
+                        financial_metrics = get_financial_metrics(sample_info)
+                        
+                        # Valuation Metrics
+                        st.subheader("Valuation Metrics")
+                        col1, col2, col3 = st.columns(3)
+                        
+                        with col1:
+                            st.metric("Market Cap", financial_metrics['Market Cap'])
+                            st.metric("P/E Ratio", financial_metrics['P/E Ratio'])
+                            st.metric("EPS (TTM)", financial_metrics['EPS (TTM)'])
+                        
+                        with col2:
+                            st.metric("Revenue (TTM)", financial_metrics['Revenue (TTM)'])
+                            st.metric("Profit Margin", financial_metrics['Profit Margin'])
+                            st.metric("Operating Margin", financial_metrics['Operating Margin'])
+                        
+                        with col3:
+                            st.metric("ROE", financial_metrics['ROE'])
+                            st.metric("Beta", financial_metrics['Beta'])
+                            st.metric("Dividend Yield", financial_metrics['Dividend Yield'])
+                    
+                    with tab4:
+                        st.info("📝 **Note:** News requires real-time data. Try again when Yahoo Finance is available.")
+                        st.markdown("""
+                        ### Sample News Headlines
+                        - **Company Q3 Results:** Strong performance across key metrics
+                        - **Market Update:** Sector outlook remains positive
+                        - **Analyst Rating:** Upgraded to 'Buy' with revised price target
+                        """)
+                
+                return  # Exit early since we've shown the demo
                 
             elif stock_info == "NO_DATA":
                 st.error(f"📊 **No Data Available**")

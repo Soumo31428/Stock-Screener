@@ -16,7 +16,8 @@ Thank you for your interest in contributing! This guide will help you get starte
    ```
 4. **Install dependencies**
    ```bash
-   pip install streamlit pandas numpy plotly yfinance
+   cp requirements-template.txt requirements.txt
+   pip install -r requirements.txt
    ```
 5. **Run the application**
    ```bash

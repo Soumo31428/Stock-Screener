@@ -15,7 +15,7 @@ git clone https://github.com/yourusername/indian-stock-dashboard.git
 cd indian-stock-dashboard
 
 # Install dependencies
-pip install streamlit pandas numpy plotly yfinance
+pip install -r requirements.txt
 
 # Run the application
 streamlit run main.py
@@ -46,8 +46,9 @@ stock-dashboard-env\Scripts\activate
 # Activate (macOS/Linux)
 source stock-dashboard-env/bin/activate
 
-# Install dependencies
-pip install streamlit pandas numpy plotly yfinance
+# Copy requirements template and install dependencies
+cp requirements-template.txt requirements.txt
+pip install -r requirements.txt
 ```
 
 ### 3. Run the Application
@@ -114,7 +115,7 @@ cat > Dockerfile << EOF
 FROM python:3.11-slim
 WORKDIR /app
 COPY . .
-RUN pip install streamlit pandas numpy plotly yfinance
+RUN cp requirements-template.txt requirements.txt && pip install -r requirements.txt
 EXPOSE 8501
 CMD ["streamlit", "run", "main.py", "--server.address", "0.0.0.0"]
 EOF

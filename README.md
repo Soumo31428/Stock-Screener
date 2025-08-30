@@ -52,8 +52,9 @@ When Yahoo Finance API is rate-limited, the app automatically switches to demo m
 git clone https://github.com/yourusername/indian-stock-dashboard.git
 cd indian-stock-dashboard
 
-# Install dependencies
-pip install streamlit pandas numpy plotly yfinance
+# Copy requirements template and install
+cp requirements-template.txt requirements.txt
+pip install -r requirements.txt
 
 # Run the application
 streamlit run main.py
@@ -63,8 +64,9 @@ The dashboard will open at `http://localhost:8501`
 
 ### Alternative Installation
 ```bash
-# Using requirements from pyproject.toml
-pip install -e .
+# Copy template and install
+cp requirements-template.txt requirements.txt
+pip install -r requirements.txt
 streamlit run main.py
 ```
 
@@ -76,9 +78,12 @@ indian-stock-dashboard/
 ├── utils.py                # Data processing & chart generation
 ├── .streamlit/
 │   └── config.toml         # Streamlit configuration
-├── pyproject.toml          # Project dependencies
-├── README.md               # This file
-└── replit.md               # Project documentation
+├── docs/                   # Documentation folder
+│   ├── INSTALLATION.md     # Installation guide
+│   └── API.md             # API documentation
+├── requirements.txt        # Python dependencies (copy from requirements-template.txt)
+├── pyproject.toml          # Project metadata
+└── README.md               # This file
 ```
 
 **Minimalist Design**: Only 4 core files, 5 dependencies, under 1000 lines of code total.
@@ -157,7 +162,7 @@ echo "web: streamlit run main.py --server.port=\$PORT --server.address=0.0.0.0" 
 FROM python:3.11-slim
 WORKDIR /app
 COPY . .
-RUN pip install -e .
+RUN cp requirements-template.txt requirements.txt && pip install -r requirements.txt
 EXPOSE 8501
 CMD ["streamlit", "run", "main.py"]
 ```

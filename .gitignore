@@ -167,7 +167,8 @@ temp/
 tmp/
 *.tmp
 
-# Replit specific
+# Development environment files
 .replit
 replit.nix
+replit.md
 uv.lock

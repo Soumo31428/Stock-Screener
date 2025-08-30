@@ -7,7 +7,7 @@ This is a comprehensive stock analysis dashboard focused on Indian stocks, built
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
-Chart preferences: Line charts instead of candlestick charts, area charts for volume.
+Chart preferences: Line charts instead of candlestick charts, area charts for volume, no moving averages, dynamic time labels (hourly for ≤5 days, daily for >5 days).
 Currency: All financial metrics should be displayed in Indian Rupees (₹).
 
 ## System Architecture

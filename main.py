@@ -115,7 +115,7 @@ def show_analysis(selected_stock, time_period):
 
             with tab1:
                 # Technical Analysis Chart
-                st.plotly_chart(create_price_chart(df, selected_stock), use_container_width=True)
+                st.plotly_chart(create_price_chart(df, selected_stock, time_period), use_container_width=True)
 
                 # Summary metrics in a single row
                 col1, col2, col3, col4 = st.columns(4)
@@ -311,7 +311,7 @@ def show_analysis(selected_stock, time_period):
                         st.info("📝 **Note:** This chart shows sample data due to Yahoo Finance rate limiting")
                         
                         # Technical Analysis Chart
-                        st.plotly_chart(create_price_chart(df, selected_stock), use_container_width=True)
+                        st.plotly_chart(create_price_chart(df, selected_stock, time_period), use_container_width=True)
                         
                         # Summary metrics in a single row
                         col1, col2, col3, col4 = st.columns(4)

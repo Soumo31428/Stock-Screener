@@ -203,8 +203,18 @@ def calculate_rsi(prices, period=14):
     rs = gain / loss
     return 100 - (100 / (1 + rs))
 
-def create_price_chart(df, symbol):
+def create_price_chart(df, symbol, period='1y'):
     """Create an interactive price chart with indicators"""
+    # Determine date range for time formatting
+    if len(df) <= 5:
+        # For 5 days or less, show hourly timestamps
+        date_format = "%H:%M"
+        title_suffix = " (Hourly)"
+    else:
+        # For more than 5 days, show dates
+        date_format = "%Y-%m-%d"
+        title_suffix = " (Daily)"
+    
     # Create figure with secondary y-axis
     fig = make_subplots(
         rows=3, 
@@ -252,28 +262,7 @@ def create_price_chart(df, symbol):
         row=1, col=1
     )
 
-    # Moving averages with clearer colors
-    fig.add_trace(
-        go.Scatter(
-            x=df.index,
-            y=df['SMA_20'],
-            name='20-Day MA',
-            line=dict(color='#00FF9D', width=1.5),
-            showlegend=True
-        ),
-        row=1, col=1
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=df.index,
-            y=df['SMA_50'],
-            name='50-Day MA',
-            line=dict(color='#FF4B4B', width=1.5),
-            showlegend=True
-        ),
-        row=1, col=1
-    )
+    # Removed moving averages as requested
 
     # Volume area chart
     fig.add_trace(
@@ -323,7 +312,7 @@ def create_price_chart(df, symbol):
         row=3, col=1
     )
 
-    # Update layout with improved styling
+    # Update layout with improved styling and dynamic title
     fig.update_layout(
         template='plotly_dark',
         paper_bgcolor='#1E1E1E',
@@ -331,6 +320,7 @@ def create_price_chart(df, symbol):
         xaxis_rangeslider_visible=False,
         height=800,
         showlegend=True,
+        title=f"{symbol} Price Chart{title_suffix}",
         legend=dict(
             yanchor="top",
             y=0.99,
@@ -338,16 +328,29 @@ def create_price_chart(df, symbol):
             x=0.01,
             bgcolor='rgba(0,0,0,0.5)'
         ),
-        margin=dict(l=50, r=50, t=30, b=50)
+        margin=dict(l=50, r=50, t=50, b=50)
     )
 
-    # Add grid and improve axes
-    fig.update_xaxes(
-        showgrid=True,
-        gridwidth=1,
-        gridcolor='rgba(128,128,128,0.2)',
-        zeroline=False
-    )
+    # Add grid and improve axes with dynamic formatting
+    if len(df) <= 5:
+        # For 5 days or less, format x-axis for hourly display
+        fig.update_xaxes(
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(128,128,128,0.2)',
+            zeroline=False,
+            tickformat="%H:%M",
+            dtick="H1"  # Show every hour
+        )
+    else:
+        # For more than 5 days, format x-axis for daily display
+        fig.update_xaxes(
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(128,128,128,0.2)',
+            zeroline=False,
+            tickformat="%Y-%m-%d"
+        )
 
     fig.update_yaxes(
         showgrid=True,

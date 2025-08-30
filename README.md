@@ -46,30 +46,25 @@ When Yahoo Finance API is rate-limited, the app automatically switches to demo m
 - Python 3.11+
 - pip package manager
 
-### Quick Start (Automated Setup)
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/indian-stock-dashboard.git
-cd indian-stock-dashboard
-
-# Automated setup (recommended)
-python setup.py
-
-# Run the application
-python run.py
-```
-
-### Manual Installation
+### Quick Start (VS Code)
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/indian-stock-dashboard.git
 cd indian-stock-dashboard
 
 # Install dependencies
-pip install streamlit pandas numpy plotly yfinance
+pip install -r requirements.txt
 
 # Run the application
 streamlit run main.py
+```
+
+### Alternative Methods
+```bash
+# Automated setup
+python setup.py && python run.py
+
+# Or double-click start.bat (Windows) / run ./start.sh (macOS/Linux)
 ```
 
 The dashboard will open at `http://localhost:8501`
@@ -82,8 +77,10 @@ indian-stock-dashboard/
 ├── utils.py                    # Data processing & chart generation
 ├── run.py                      # Application launcher
 ├── setup.py                    # Automated setup script
-├── requirements.txt            # Python dependencies (auto-generated)
-├── standalone-requirements.txt # Standalone dependencies
+├── requirements.txt            # Python dependencies
+├── .vscode/                    # VS Code configuration
+│   ├── settings.json          # Editor settings
+│   └── launch.json            # Debug configuration
 ├── .streamlit/
 │   └── config.toml            # Streamlit configuration (auto-generated)
 ├── docs/                      # Documentation folder

@@ -8,7 +8,20 @@
 
 ## Quick Installation
 
-### Option 1: Automated Setup (Recommended)
+### Option 1: VS Code Workflow (Recommended)
+```bash
+# Clone or download the repository
+git clone https://github.com/yourusername/indian-stock-dashboard.git
+cd indian-stock-dashboard
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run in VS Code terminal
+streamlit run main.py
+```
+
+### Option 2: Automated Setup
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/indian-stock-dashboard.git
@@ -19,19 +32,6 @@ python setup.py
 
 # Start the application
 python run.py
-```
-
-### Option 2: Manual Installation
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/indian-stock-dashboard.git
-cd indian-stock-dashboard
-
-# Install dependencies manually
-pip install streamlit pandas numpy plotly yfinance
-
-# Run the application
-streamlit run main.py
 ```
 
 ### Option 2: Install from PyPI (if published)

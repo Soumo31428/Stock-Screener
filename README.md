@@ -46,15 +46,27 @@ When Yahoo Finance API is rate-limited, the app automatically switches to demo m
 - Python 3.11+
 - pip package manager
 
-### Quick Start
+### Quick Start (Automated Setup)
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/indian-stock-dashboard.git
 cd indian-stock-dashboard
 
-# Copy requirements template and install
-cp requirements-template.txt requirements.txt
-pip install -r requirements.txt
+# Automated setup (recommended)
+python setup.py
+
+# Run the application
+python run.py
+```
+
+### Manual Installation
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/indian-stock-dashboard.git
+cd indian-stock-dashboard
+
+# Install dependencies
+pip install streamlit pandas numpy plotly yfinance
 
 # Run the application
 streamlit run main.py
@@ -62,31 +74,26 @@ streamlit run main.py
 
 The dashboard will open at `http://localhost:8501`
 
-### Alternative Installation
-```bash
-# Copy template and install
-cp requirements-template.txt requirements.txt
-pip install -r requirements.txt
-streamlit run main.py
-```
-
 ## 🏗️ Project Structure
 
 ```
 indian-stock-dashboard/
-├── main.py                 # Main Streamlit application
-├── utils.py                # Data processing & chart generation
+├── main.py                     # Main Streamlit application
+├── utils.py                    # Data processing & chart generation
+├── run.py                      # Application launcher
+├── setup.py                    # Automated setup script
+├── requirements.txt            # Python dependencies (auto-generated)
+├── standalone-requirements.txt # Standalone dependencies
 ├── .streamlit/
-│   └── config.toml         # Streamlit configuration
-├── docs/                   # Documentation folder
-│   ├── INSTALLATION.md     # Installation guide
-│   └── API.md             # API documentation
-├── requirements.txt        # Python dependencies (copy from requirements-template.txt)
-├── pyproject.toml          # Project metadata
-└── README.md               # This file
+│   └── config.toml            # Streamlit configuration (auto-generated)
+├── docs/                      # Documentation folder
+│   ├── INSTALLATION.md        # Installation guide
+│   └── API.md                # API documentation
+├── pyproject.toml             # Project metadata
+└── README.md                  # This file
 ```
 
-**Minimalist Design**: Only 4 core files, 5 dependencies, under 1000 lines of code total.
+**Minimalist Design**: Standalone setup, cross-platform compatibility, 5 dependencies only.
 
 ## 🎨 Screenshots
 

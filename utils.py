@@ -14,10 +14,20 @@ def get_stock_data(symbol, period='1y', start_date=None, end_date=None):
             hist = stock.history(start=start_date, end=end_date)
         else:
             hist = stock.history(period=period)
+        
+        # Handle cases where data might be empty
+        if hist.empty:
+            print(f"No data available for {symbol}")
+            return None, None
+            
         info = stock.info
         return hist, info
     except Exception as e:
-        print(f"Error fetching stock data: {str(e)}")
+        error_msg = str(e)
+        if "Rate limited" in error_msg or "Too Many Requests" in error_msg:
+            print(f"Rate limit reached for {symbol}. Please wait a few minutes before trying again.")
+        else:
+            print(f"Error fetching stock data for {symbol}: {error_msg}")
         return None, None
 
 def calculate_metrics(df):

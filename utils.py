@@ -6,29 +6,56 @@ import numpy as np
 import trafilatura
 from datetime import datetime, timedelta
 
-def get_stock_data(symbol, period='1y', start_date=None, end_date=None):
-    """Fetch stock data using yfinance"""
-    try:
-        stock = yf.Ticker(symbol)
-        if period == 'custom' and start_date and end_date:
-            hist = stock.history(start=start_date, end=end_date)
-        else:
-            hist = stock.history(period=period)
-        
-        # Handle cases where data might be empty
-        if hist.empty:
-            print(f"No data available for {symbol}")
-            return None, None
+def get_stock_data(symbol, period='1y', start_date=None, end_date=None, retry_count=3):
+    """Fetch stock data using yfinance with retry logic"""
+    import time
+    
+    for attempt in range(retry_count):
+        try:
+            stock = yf.Ticker(symbol)
             
-        info = stock.info
-        return hist, info
-    except Exception as e:
-        error_msg = str(e)
-        if "Rate limited" in error_msg or "Too Many Requests" in error_msg:
-            print(f"Rate limit reached for {symbol}. Please wait a few minutes before trying again.")
-        else:
-            print(f"Error fetching stock data for {symbol}: {error_msg}")
-        return None, None
+            # Add small delay between requests to avoid rate limiting
+            if attempt > 0:
+                time.sleep(2 * attempt)
+            
+            if period == 'custom' and start_date and end_date:
+                hist = stock.history(start=start_date, end=end_date)
+            else:
+                hist = stock.history(period=period)
+            
+            # Handle cases where data might be empty
+            if hist.empty:
+                print(f"No data available for {symbol} on attempt {attempt + 1}")
+                if attempt < retry_count - 1:
+                    continue
+                return None, "NO_DATA"
+                
+            info = stock.info
+            # Check if info is properly loaded
+            if not info or len(info) < 5:
+                print(f"Incomplete stock info for {symbol} on attempt {attempt + 1}")
+                if attempt < retry_count - 1:
+                    continue
+                return None, "INCOMPLETE_INFO"
+                
+            return hist, info
+            
+        except Exception as e:
+            error_msg = str(e)
+            if "Rate limited" in error_msg or "Too Many Requests" in error_msg:
+                print(f"Rate limit reached for {symbol} on attempt {attempt + 1}. Waiting before retry...")
+                if attempt < retry_count - 1:
+                    time.sleep(5 * (attempt + 1))  # Increase wait time with each retry
+                    continue
+                return None, "RATE_LIMITED"
+            else:
+                print(f"Error fetching stock data for {symbol}: {error_msg}")
+                if attempt < retry_count - 1:
+                    time.sleep(1)
+                    continue
+                return None, f"ERROR: {error_msg}"
+    
+    return None, "MAX_RETRIES_EXCEEDED"
 
 def calculate_metrics(df):
     """Calculate technical indicators"""

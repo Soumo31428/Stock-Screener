@@ -62,7 +62,7 @@ def show_analysis(selected_stock, time_period):
         else:
             hist_data, stock_info = get_stock_data(selected_stock, time_period)
 
-        if hist_data is not None and stock_info is not None:
+        if hist_data is not None and stock_info is not None and stock_info not in ["NO_DATA", "INCOMPLETE_INFO", "RATE_LIMITED", "MAX_RETRIES_EXCEEDED"] and not str(stock_info).startswith("ERROR:"):
             # Calculate metrics
             df = calculate_metrics(hist_data)
 
@@ -235,7 +235,93 @@ def show_analysis(selected_stock, time_period):
                 else:
                     st.info("No recent news available")
         else:
-            st.error('Error loading stock data. Please try again later.')
+            # Show specific error messages based on the error type
+            if stock_info == "RATE_LIMITED":
+                st.error("🚫 **Rate Limited by Yahoo Finance**")
+                st.warning("""
+                **Why this happened:**
+                - Yahoo Finance limits free API requests
+                - Too many requests in a short time period
+                
+                **Solutions:**
+                1. **Wait 5-10 minutes** and try again
+                2. Try a **different stock** from the dropdown
+                3. **Refresh the page** and try again
+                4. Use the app during **off-peak hours**
+                """)
+                
+                st.info("💡 **Tip:** Try selecting a different stock while waiting for the rate limit to reset.")
+                
+            elif stock_info == "NO_DATA":
+                st.error(f"📊 **No Data Available**")
+                st.warning(f"""
+                The stock symbol **{selected_stock}** appears to be invalid or delisted.
+                
+                **Please try:**
+                - Selecting a different stock from the dropdown
+                - Checking if the symbol is correct
+                """)
+                
+            elif stock_info == "INCOMPLETE_INFO":
+                st.error("⚠️ **Incomplete Stock Information**")
+                st.warning("""
+                The stock data was partially loaded but missing key information.
+                
+                **Please try:**
+                - Refreshing the page
+                - Trying again in a few minutes
+                - Selecting a different stock
+                """)
+                
+            elif stock_info == "MAX_RETRIES_EXCEEDED":
+                st.error("🔄 **Maximum Retries Exceeded**")
+                st.warning("""
+                We tried multiple times but couldn't load the stock data.
+                
+                **This usually means:**
+                - Yahoo Finance is experiencing issues
+                - Your internet connection might be unstable
+                - The specific stock data is temporarily unavailable
+                
+                **Please try:**
+                - Waiting 10-15 minutes and trying again
+                - Selecting a different stock
+                - Refreshing the browser page
+                """)
+                
+            elif str(stock_info).startswith("ERROR:"):
+                error_detail = str(stock_info).replace("ERROR: ", "")
+                st.error("❌ **Technical Error Occurred**")
+                st.warning(f"""
+                **Error Details:** {error_detail}
+                
+                **Please try:**
+                - Refreshing the page
+                - Trying again in a few minutes
+                - Contact support if the problem persists
+                """)
+                
+            else:
+                st.error('❌ **Error Loading Stock Data**')
+                st.warning("""
+                **General troubleshooting:**
+                1. Wait a few minutes and try again
+                2. Select a different stock
+                3. Refresh the browser page
+                4. Check your internet connection
+                """)
+            
+            # Suggest alternative stocks
+            st.markdown("### 🔄 Try These Popular Stocks Instead:")
+            suggested_stocks = ['TCS.NS', 'HDFCBANK.NS', 'INFY.NS', 'ICICIBANK.NS', 'WIPRO.NS']
+            cols = st.columns(len(suggested_stocks))
+            for i, stock in enumerate(suggested_stocks):
+                if stock != selected_stock:  # Don't suggest the same stock
+                    with cols[i]:
+                        if st.button(f"📈 {stock.replace('.NS', '')}", key=f"suggest_{stock}"):
+                            st.session_state.selected_stock = stock
+                            st.session_state.current_page = 'analysis'
+                            st.rerun()
 
 # Sidebar
 st.sidebar.title('Indian Stock Analysis Dashboard')

@@ -8,13 +8,6 @@ A lightweight stock analysis dashboard for Indian stocks with smart rate-limitin
 - Company profiles and financial metrics
 - Smart Yahoo Finance rate limit handling
 
-## Minimal File Structure
-```
-├── main.py              # Complete Streamlit app (CSS embedded)
-├── utils.py             # Data processing & chart generation  
-├── .streamlit/config.toml   # Streamlit configuration
-└── pyproject.toml       # Dependencies (5 packages only)
-```
 
 ## Dependencies (Only 5 packages)
 ```

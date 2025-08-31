@@ -27,8 +27,3 @@ streamlit run main.py
 ## Demo Mode
 When Yahoo Finance rate limits requests, the app automatically switches to realistic sample data, maintaining full functionality.
 
-## File Sizes
-- main.py: ~400 lines (includes embedded CSS)
-- utils.py: ~430 lines  
-- Total: Under 1000 lines of code
-- Dependencies: 5 packages only
